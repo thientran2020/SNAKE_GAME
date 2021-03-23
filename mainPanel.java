@@ -3,6 +3,18 @@ import java.awt.event.*;
 import javax.swing.*;
 import java.util.Random;
 
+/*
+ * @mainPanel: the main panel for the game
+ * Panel has size PANEL_WIDTH * PANEL_HEIGHT - each small unit has size UNIT_SIZE * UNIT_SIZE
+ * Attributes:
+ * @X, Y: arrays contain the positions of the snake with length = @snakeLength
+ * @defaultLength: the default length of the snake when app is run
+ * @(giftX, giftY): the coordinates of the target
+ * @direction: character implies 'U'p, 'D'own, 'R'ight, 'L'eft.
+ * @moving: boolean variable shows the status of the snake (moving == False => the game is over)
+ * @tempStop: boolean variable shows the status of the game (temporary stop / continue when Enter is pressed)
+ * @DELAY_TIME: time to delay for timer (the smaller DELAY_TIME is, the faster the snake is moving)
+ */
 class mainPanel extends JPanel implements ActionListener{
 	final int PANEL_WIDTH = 1000;
 	final int PANEL_HEIGHT = 800;
@@ -25,14 +37,7 @@ class mainPanel extends JPanel implements ActionListener{
 		this.setFocusable(true);
 		this.setBackground(Color.black);
 		this.addKeyListener(new MyKeyAdapter());
-		this.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mousePressed(MouseEvent e) {
-				int x = ((int) e.getX() / UNIT_SIZE);
-				int y = ((int) e.getY() / UNIT_SIZE);
-			    wall[x][y] = true;
-			}
-		});
+		this.addMouseListener(new MyMouseAdapter());
 		start();
 	}
 	
@@ -164,6 +169,7 @@ class mainPanel extends JPanel implements ActionListener{
 		repaint();
 	}
 	
+	// Custom KeyAdapter class
 	public class MyKeyAdapter extends KeyAdapter {
 		@Override
 		public void keyPressed(KeyEvent e) {
@@ -184,6 +190,16 @@ class mainPanel extends JPanel implements ActionListener{
 				}
 				tempStop = !tempStop;
 			}
+		}
+	}
+	
+	// Custom MouseAdapter class
+	public class MyMouseAdapter extends MouseAdapter {
+		@Override
+		public void mousePressed(MouseEvent e) {
+			int x = ((int) e.getX() / UNIT_SIZE);
+			int y = ((int) e.getY() / UNIT_SIZE);
+		    wall[x][y] = true;
 		}
 	}
 }

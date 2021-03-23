@@ -1,3 +1,8 @@
+/* Thien Tran
+ * Date: 03/22/2021
+ * Purpose: Practice Java GUI using Java AWT & Swing.
+ */
+
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 
@@ -6,6 +11,7 @@ public class snake {
 		new snakeGame();
 	}
 }
+
 class snakeGame extends JFrame{
 	snakeGame() {
 		this.add(new mainPanel());
