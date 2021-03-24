@@ -16,20 +16,21 @@ import java.util.Random;
  * @DELAY_TIME: time to delay for timer (the smaller DELAY_TIME is, the faster the snake is moving)
  */
 class mainPanel extends JPanel implements ActionListener{
-	final int PANEL_WIDTH = 1000;
-	final int PANEL_HEIGHT = 800;
-	final int UNIT_SIZE = 20;
-	final int DELAY_TIME = 70;
-	final int[] X = new int[PANEL_WIDTH / UNIT_SIZE];
-	final int[] Y = new int[PANEL_HEIGHT / UNIT_SIZE];
-	final boolean[][] wall = new boolean[PANEL_WIDTH / UNIT_SIZE][PANEL_HEIGHT / UNIT_SIZE];
-	int defaultLength = 7, snakeLength = 7;
+	static final int PANEL_WIDTH = 1000;
+	static final int PANEL_HEIGHT = 800;
+	static final int UNIT_SIZE = 20;
+	static final int DELAY_TIME = 70;
+	int[] X = new int[PANEL_WIDTH / UNIT_SIZE];
+	int[] Y = new int[PANEL_HEIGHT / UNIT_SIZE];
+	boolean[][] wall = new boolean[PANEL_WIDTH / UNIT_SIZE][PANEL_HEIGHT / UNIT_SIZE];
+	int defaultLength = 7;
+	int snakeLength = 7;
 	int giftX;
 	int giftY;
 	char direction = 'R';
 	boolean moving = true;
 	boolean tempStop = false;
-	Timer timer;
+	Timer timer = new Timer(DELAY_TIME, this);
 	Random random = new Random();
 	
 	mainPanel() {
@@ -42,17 +43,16 @@ class mainPanel extends JPanel implements ActionListener{
 	}
 	
 	public void start() {
-		int numUnitsX = (int) PANEL_WIDTH / UNIT_SIZE;
-		int numUnitsY = (int) PANEL_WIDTH / UNIT_SIZE;
-		X[0] = (random.nextInt((int) numUnitsX / 2) + (int) numUnitsX / 4) * UNIT_SIZE; 
-		Y[0] = (random.nextInt((int) numUnitsY / 2) + (int) numUnitsY / 4) * UNIT_SIZE;
+		int numUnitsX = PANEL_WIDTH / UNIT_SIZE;
+		int numUnitsY = PANEL_WIDTH / UNIT_SIZE;
+		X[0] = (random.nextInt(numUnitsX / 2) + numUnitsX / 4) * UNIT_SIZE; 
+		Y[0] = (random.nextInt(numUnitsY / 2) + numUnitsY / 4) * UNIT_SIZE;
 		for (int i = 1; i < snakeLength; i++) {
 			X[i] = X[0];
 			Y[i] = Y[0];
 		}
 		
 		createGift();
-		timer = new Timer(DELAY_TIME, this);
 		timer.start();
 	}
 	
@@ -93,8 +93,8 @@ class mainPanel extends JPanel implements ActionListener{
 	}
 	
 	public void createGift( ) {
-		giftX = random.nextInt((int) PANEL_WIDTH / UNIT_SIZE); 
-		giftY = random.nextInt((int) PANEL_HEIGHT / UNIT_SIZE);
+		giftX = random.nextInt(PANEL_WIDTH / UNIT_SIZE); 
+		giftY = random.nextInt(PANEL_HEIGHT / UNIT_SIZE);
 		if (wall[giftX][giftY])
 			createGift();
 		giftX *= UNIT_SIZE;
@@ -154,8 +154,8 @@ class mainPanel extends JPanel implements ActionListener{
 		g.setFont(new Font("SANS_SERIF", Font.BOLD, 80));
 		FontMetrics metrics1 = getFontMetrics(g.getFont());
 		String over = "GAME OVER";
-		int overX = (int) (PANEL_WIDTH - metrics1.stringWidth(over)) / 2;
-		int overY = (int) (PANEL_HEIGHT - g.getFont().getSize())/ 3;
+		int overX = (PANEL_WIDTH - metrics1.stringWidth(over)) / 2;
+		int overY = (PANEL_HEIGHT - g.getFont().getSize())/ 3;
 		g.drawString(over, overX, overY);
 	}
 	
@@ -189,17 +189,65 @@ class mainPanel extends JPanel implements ActionListener{
 					timer.stop();
 				}
 				tempStop = !tempStop;
+			} else if (keyCode == KeyEvent.VK_ESCAPE) {
+				for (int i = 0; i < wall.length; i++) {
+					for (int j = 0; j < wall[0].length; j++) {
+						wall[i][j] = false;
+					}
+				}
+				moving = true;
+				repaint();
+				start();
 			}
 		}
 	}
 	
 	// Custom MouseAdapter class
 	public class MyMouseAdapter extends MouseAdapter {
+		int startX;
+		int startY;
+		int releaseX;
+		int releaseY;
+
 		@Override
 		public void mousePressed(MouseEvent e) {
-			int x = ((int) e.getX() / UNIT_SIZE);
-			int y = ((int) e.getY() / UNIT_SIZE);
-		    wall[x][y] = true;
+			startX = (e.getX() / UNIT_SIZE);
+			startY = (e.getY() / UNIT_SIZE);
+		    wall[startX][startY] = true;
+		}
+		
+		@Override
+		public void mouseReleased(MouseEvent e) {
+			releaseX = (e.getX() / UNIT_SIZE);
+			releaseY = (e.getY() / UNIT_SIZE);
+
+			if (startX > releaseX) {
+				int tmp = startX;
+				startX = releaseX;
+				releaseX = tmp;
+
+				tmp = startY;
+				startY = releaseY;
+				releaseY = tmp;
+			}
+
+			if (releaseY < startY) {
+				fill(startX, releaseY, startX, startY);
+				fill(startX, releaseY, releaseX, releaseY);
+			} else {
+				fill(startX, startY, startX, releaseY);
+				fill(startX, releaseY, releaseX, releaseY);
+			}
+		}
+
+		private void fill(int x1, int y1, int x2, int y2) {
+			if (x1 == x2)
+				for (int i = y1; i <= y2; i++) 
+					wall[x1][i] = true;
+			else {
+				for (int i = x1; i <= x2; i++) 
+					wall[i][y1] = true;
+			}
 		}
 	}
 }
